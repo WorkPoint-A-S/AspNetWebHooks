@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
+using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using Microsoft.AspNet.WebHooks.Filters;
 using Microsoft.AspNet.WebHooks.Properties;
@@ -23,6 +24,7 @@ namespace Microsoft.AspNet.WebHooks.Controllers
     /// </summary>
     [Authorize]
     [RoutePrefix("api/webhooks/registrations")]
+    [EnableCors("*", "*", "*", SupportsCredentials = true)]
     public class WebHookRegistrationsController : ApiController
     {
         private IWebHookRegistrationsManager _registrationsManager;
