@@ -77,7 +77,9 @@ namespace Microsoft.AspNet.WebHooks
 
             VerifyUri(webHook.WebHookUri);
 
-            await VerifyEchoAsync(webHook);
+            // DO NOT VERIFY ECHO FOR NON CUSTOM RECEIVERS
+            //await VerifyEchoAsync(webHook);
+            await Extensions.TaskExtensions.CompletedTask;
         }
 
         /// <inheritdoc />
