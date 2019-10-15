@@ -24,7 +24,10 @@ namespace Microsoft.AspNet.WebHooks.Storage
     [CLSCompliant(false)]
     public class StorageManager : IStorageManager
     {
-        private const string AzureStoreConnectionStringName = "MS_AzureStoreConnectionString";
+        /// <summary>
+        /// Azure store connection string key used in config file
+        /// </summary>
+        public const string AzureStoreConnectionStringName = "MS_AzureStoreConnectionString";
         private const string PartitionKey = "PartitionKey";
         private const string RowKey = "RowKey";
 
