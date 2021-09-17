@@ -9,10 +9,11 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.AspNet.WebHooks.Diagnostics;
 using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.WebHooks
@@ -43,7 +44,7 @@ namespace Microsoft.AspNet.WebHooks
         private readonly WebHookSender _sender;
 
         private readonly JsonSerializerSettings _serializerSettings = new JsonSerializerSettings();
-        private readonly CloudQueue _queue;
+        private readonly QueueClient _queue;
 
         private CancellationTokenSource _tokenSource;
         private bool _disposed;
@@ -165,7 +166,7 @@ namespace Microsoft.AspNet.WebHooks
                         // Extract the work items
                         ICollection<WebHookWorkItem> workItems = messages.Select(m =>
                         {
-                            var workItem = JsonConvert.DeserializeObject<WebHookWorkItem>(m.AsString, _serializerSettings);
+                            var workItem = JsonConvert.DeserializeObject<WebHookWorkItem>(m.Body.ToString(), _serializerSettings);
                             workItem.Properties[QueueMessageKey] = m;
                             return workItem;
                         }).ToArray();
@@ -250,7 +251,7 @@ namespace Microsoft.AspNet.WebHooks
                 }
 
                 // Keep track of which queued messages should be deleted because processing has completed.
-                var deleteMessages = new List<CloudQueueMessage>();
+                var deleteMessages = new List<QueueMessage>();
 
                 // Keep track of the response messages
                 var responses = new List<HttpResponseMessage>();
@@ -300,9 +301,9 @@ namespace Microsoft.AspNet.WebHooks
                 await _parent._storageManager.DeleteMessagesAsync(_parent._queue, deleteMessages);
             }
 
-            private CloudQueueMessage GetMessage(WebHookWorkItem workItem)
+            private QueueMessage GetMessage(WebHookWorkItem workItem)
             {
-                var queueMessage = workItem?.Properties.GetValueOrDefault<CloudQueueMessage>(QueueMessageKey);
+                var queueMessage = workItem?.Properties.GetValueOrDefault<QueueMessage>(QueueMessageKey);
                 if (queueMessage == null)
                 {
                     var message = string.Format(CultureInfo.CurrentCulture, AzureStorageResources.DequeueManager_NoProperty, QueueMessageKey, workItem?.Id);
@@ -312,7 +313,7 @@ namespace Microsoft.AspNet.WebHooks
                 return queueMessage;
             }
 
-            private bool DiscardMessage(WebHookWorkItem workItem, CloudQueueMessage message)
+            private bool DiscardMessage(WebHookWorkItem workItem, QueueMessage message)
             {
                 if (message.DequeueCount >= _parent._maxAttempts)
                 {

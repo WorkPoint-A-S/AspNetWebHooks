@@ -3,7 +3,7 @@
 
 using System;
 using System.ComponentModel;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.AspNet.WebHooks
 {

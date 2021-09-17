@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Queues.Models;
 using Microsoft.AspNet.WebHooks.Config;
 using Microsoft.AspNet.WebHooks.Diagnostics;
 using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.WebHooks
@@ -61,13 +61,13 @@ namespace Microsoft.AspNet.WebHooks
             }
 
             // Serialize WebHook requests and convert to queue messages
-            IEnumerable<CloudQueueMessage> messages = null;
+            IEnumerable<string> messages = null;
             try
             {
                 messages = workItems.Select(item =>
                     {
                         var content = JsonConvert.SerializeObject(item, _serializerSettings);
-                        var message = new CloudQueueMessage(content);
+                        var message = content;
                         return message;
                     }).ToArray();
             }

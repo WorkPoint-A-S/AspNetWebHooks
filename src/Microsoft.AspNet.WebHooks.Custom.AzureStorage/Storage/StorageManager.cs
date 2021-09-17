@@ -8,13 +8,13 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.AspNet.WebHooks.Config;
 using Microsoft.AspNet.WebHooks.Diagnostics;
 using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Utilities;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.AspNet.WebHooks.Storage
 {
@@ -35,7 +35,6 @@ namespace Microsoft.AspNet.WebHooks.Storage
         private const int MaxBatchSize = 100;
 
         private static readonly ConcurrentDictionary<string, CloudStorageAccount> TableAccounts = new ConcurrentDictionary<string, CloudStorageAccount>();
-        private static readonly ConcurrentDictionary<string, CloudStorageAccount> QueueAccounts = new ConcurrentDictionary<string, CloudStorageAccount>();
 
         private static IStorageManager _storageManager;
 
@@ -132,7 +131,7 @@ namespace Microsoft.AspNet.WebHooks.Storage
         }
 
         /// <inheritdoc />
-        public CloudQueue GetCloudQueue(string connectionString, string queueName)
+        public QueueClient GetCloudQueue(string connectionString, string queueName)
         {
             if (connectionString == null)
             {
@@ -143,32 +142,8 @@ namespace Microsoft.AspNet.WebHooks.Storage
                 throw new ArgumentNullException(nameof(queueName));
             }
 
-            var queueKey = GetLookupKey(connectionString, queueName);
-            var account = QueueAccounts.GetOrAdd(
-                queueKey,
-                key =>
-                {
-                    var storageAccount = GetCloudStorageAccount(connectionString);
-                    try
-                    {
-                        // Ensure that queue exists
-                        var client = storageAccount.CreateCloudQueueClient();
-                        var cloudQueue = client.GetQueueReference(queueName);
-                        cloudQueue.CreateIfNotExists();
-                    }
-                    catch (Exception ex)
-                    {
-                        var error = GetStorageErrorMessage(ex);
-                        var message = string.Format(CultureInfo.CurrentCulture, AzureStorageResources.StorageManager_InitializationFailure, error);
-                        _logger.Error(message, ex);
-                        throw new InvalidOperationException(message, ex);
-                    }
-
-                    return storageAccount;
-                });
-
-            var cloudClient = account.CreateCloudQueueClient();
-            return cloudClient.GetQueueReference(queueName);
+            var queueServiceClient = new QueueServiceClient(connectionString);
+            return queueServiceClient.GetQueueClient(queueName);
         }
 
         /// <inheritdoc />
@@ -378,7 +353,7 @@ namespace Microsoft.AspNet.WebHooks.Storage
         }
 
         /// <inheritdoc />
-        public async Task AddMessagesAsync(CloudQueue queue, IEnumerable<CloudQueueMessage> messages)
+        public async Task AddMessagesAsync(QueueClient queue, IEnumerable<string> messages)
         {
             if (queue == null)
             {
@@ -390,7 +365,7 @@ namespace Microsoft.AspNet.WebHooks.Storage
                 var addTasks = new List<Task>();
                 foreach (var message in messages)
                 {
-                    var addTask = queue.AddMessageAsync(message);
+                    var addTask = queue.SendMessageAsync(message);
                     addTasks.Add(addTask);
                 }
 
@@ -406,7 +381,7 @@ namespace Microsoft.AspNet.WebHooks.Storage
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<CloudQueueMessage>> GetMessagesAsync(CloudQueue queue, int messageCount, TimeSpan timeout)
+        public async Task<IEnumerable<QueueMessage>> GetMessagesAsync(QueueClient queue, int messageCount, TimeSpan timeout)
         {
             if (queue == null)
             {
@@ -415,8 +390,8 @@ namespace Microsoft.AspNet.WebHooks.Storage
 
             try
             {
-                var messages = await queue.GetMessagesAsync(messageCount, timeout, options: null, operationContext: null);
-                return messages;
+                var messages = await queue.ReceiveMessagesAsync(messageCount, timeout);
+                return messages.Value;
             }
             catch (Exception ex)
             {
@@ -424,12 +399,12 @@ namespace Microsoft.AspNet.WebHooks.Storage
                 var statusCode = GetStorageStatusCode(ex);
                 var message = string.Format(CultureInfo.CurrentCulture, AzureStorageResources.StorageManager_OperationFailed, statusCode, errorMessage);
                 _logger.Error(message, ex);
-                return Enumerable.Empty<CloudQueueMessage>();
+                return Enumerable.Empty<QueueMessage>();
             }
         }
 
         /// <inheritdoc />
-        public async Task DeleteMessagesAsync(CloudQueue queue, IEnumerable<CloudQueueMessage> messages)
+        public async Task DeleteMessagesAsync(QueueClient queue, IEnumerable<QueueMessage> messages)
         {
             if (queue == null)
             {
@@ -441,7 +416,7 @@ namespace Microsoft.AspNet.WebHooks.Storage
                 var deleteTasks = new List<Task>();
                 foreach (var message in messages)
                 {
-                    var deleteTask = queue.DeleteMessageAsync(message);
+                    var deleteTask = queue.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                     deleteTasks.Add(deleteTask);
                 }
 

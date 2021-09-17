@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.AspNet.WebHooks.Config;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.Queue;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace Microsoft.AspNet.WebHooks.Storage
 {
@@ -37,10 +37,10 @@ namespace Microsoft.AspNet.WebHooks.Storage
         CloudTable GetCloudTable(string connectionString, string tableName);
 
         /// <summary>
-        /// Gets a <see cref="CloudQueue"/> given a <paramref name="connectionString"/> and <paramref name="queueName"/>.
+        /// Gets a <see cref="QueueClient"/> given a <paramref name="connectionString"/> and <paramref name="queueName"/>.
         /// </summary>
         /// <returns>A new <see cref="CloudTable"/> instance.</returns>
-        CloudQueue GetCloudQueue(string connectionString, string queueName);
+        QueueClient GetCloudQueue(string connectionString, string queueName);
 
         /// <summary>
         /// Adds an explicit partition key constraint to an existing query.
@@ -85,25 +85,25 @@ namespace Microsoft.AspNet.WebHooks.Storage
         /// <summary>
         /// Inserts the given <paramref name="messages"/> to the given <paramref name="queue"/>.
         /// </summary>
-        /// <param name="queue">The <see cref="CloudQueue"/> to insert into the queue.</param>
+        /// <param name="queue">The <see cref="QueueClient"/> to insert into the queue.</param>
         /// <param name="messages">The messages to add.</param>
-        Task AddMessagesAsync(CloudQueue queue, IEnumerable<CloudQueueMessage> messages);
+        Task AddMessagesAsync(QueueClient queue, IEnumerable<string> messages);
 
         /// <summary>
         /// Gets messages from the given <paramref name="queue"/>. 
         /// </summary>
-        /// <param name="queue">The <see cref="CloudQueue"/> to retrieve the messages from.</param>
+        /// <param name="queue">The <see cref="QueueClient"/> to retrieve the messages from.</param>
         /// <param name="messageCount">The number of messages to retrieve.</param>
         /// <param name="timeout">A <see cref="TimeSpan"/> specifying the visibility timeout.</param>
         /// <returns>A collection of retrieved messages.</returns>
-        Task<IEnumerable<CloudQueueMessage>> GetMessagesAsync(CloudQueue queue, int messageCount, TimeSpan timeout);
+        Task<IEnumerable<QueueMessage>> GetMessagesAsync(QueueClient queue, int messageCount, TimeSpan timeout);
 
         /// <summary>
         /// Deletes the given <paramref name="messages"/> from the given <paramref name="queue"/>.
         /// </summary>
-        /// <param name="queue">The <see cref="CloudQueue"/> to delete the messages from.</param>
+        /// <param name="queue">The <see cref="QueueClient"/> to delete the messages from.</param>
         /// <param name="messages">The messages to delete.</param>
-        Task DeleteMessagesAsync(CloudQueue queue, IEnumerable<CloudQueueMessage> messages);
+        Task DeleteMessagesAsync(QueueClient queue, IEnumerable<QueueMessage> messages);
 
         /// <summary>
         /// Gets the extended error message from a <see cref="StorageException"/> or the Message information from any other <see cref="Exception"/> type.
