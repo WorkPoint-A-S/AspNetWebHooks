@@ -14,7 +14,8 @@ using Microsoft.AspNet.WebHooks.Config;
 using Microsoft.AspNet.WebHooks.Diagnostics;
 using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Utilities;
-using Microsoft.Azure.Cosmos.Table;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace Microsoft.AspNet.WebHooks.Storage
 {

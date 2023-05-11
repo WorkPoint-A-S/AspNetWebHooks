@@ -12,7 +12,7 @@ using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Services;
 using Microsoft.AspNet.WebHooks.Storage;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Azure.Cosmos.Table;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.WebHooks
