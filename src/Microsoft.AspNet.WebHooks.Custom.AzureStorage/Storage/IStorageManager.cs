@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Azure.Storage.Queues;
 using Azure.Storage.Queues.Models;
 using Microsoft.AspNet.WebHooks.Config;
-using Microsoft.Azure.Cosmos.Table;
+using Microsoft.Azure.Cosmos;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
 
 namespace Microsoft.AspNet.WebHooks.Storage
 {

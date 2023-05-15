@@ -45,9 +45,10 @@ namespace System.Web.Http
         /// Using this initializer, the data will be encrypted using <see cref="IDataProtector"/>.
         /// </summary>
         /// <param name="config">The current <see cref="HttpConfiguration"/>config.</param>
-        public static void InitializeCustomWebHooksAzureStorage(this HttpConfiguration config)
+        /// <param name="tableName">The name to use for the azure storage table.</param>
+        public static void InitializeCustomWebHooksAzureStorage(this HttpConfiguration config, string tableName = "WebHooks")
         {
-            InitializeCustomWebHooksAzureStorage(config, encryptData: true);
+            InitializeCustomWebHooksAzureStorage(config, encryptData: true, tableName);
         }
 
         /// <summary>
@@ -56,7 +57,8 @@ namespace System.Web.Http
         /// </summary>
         /// <param name="config">The current <see cref="HttpConfiguration"/>config.</param>
         /// <param name="encryptData">Indicates whether the data should be encrypted using <see cref="IDataProtector"/> while persisted.</param>
-        public static void InitializeCustomWebHooksAzureStorage(this HttpConfiguration config, bool encryptData)
+        /// <param name="tableName">The name to use for the azure storage table.</param>
+        public static void InitializeCustomWebHooksAzureStorage(this HttpConfiguration config, bool encryptData, string tableName = "WebHooks")
         {
             if (config == null)
             {
@@ -73,11 +75,11 @@ namespace System.Web.Http
             if (encryptData)
             {
                 IDataProtector protector = DataSecurity.GetDataProtector();
-                store = new AzureWebHookStore(storageManager, settings, protector, logger);
+                store = new AzureWebHookStore(storageManager, settings, protector, logger, tableName);
             }
             else
             {
-                store = new AzureWebHookStore(storageManager, settings, logger);
+                store = new AzureWebHookStore(storageManager, settings, logger, tableName);
             }
             CustomServices.SetStore(store);
         }

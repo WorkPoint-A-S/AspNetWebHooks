@@ -12,7 +12,7 @@ using Microsoft.AspNet.WebHooks.Properties;
 using Microsoft.AspNet.WebHooks.Services;
 using Microsoft.AspNet.WebHooks.Storage;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Azure.Cosmos.Table;
+using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
 
 namespace Microsoft.AspNet.WebHooks
@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.WebHooks
     [CLSCompliant(false)]
     public class AzureWebHookStore : WebHookStore
     {
-        internal const string WebHookTable = "WebHooks";
+        private string WebHookTable = "WebHooks";
         internal const string WebHookDataColumn = "Data";
         internal const int AzureStoreSecretKeyMinLength = 8;
         internal const int AzureStoreSecretKeyMaxLength = 64;
@@ -39,8 +39,9 @@ namespace Microsoft.AspNet.WebHooks
         /// <paramref name="settings"/>, and <paramref name="logger"/>.
         /// Using this constructor, the data will not be encrypted while persisted to Azure Storage.
         /// </summary>
-        public AzureWebHookStore(IStorageManager manager, SettingsDictionary settings, ILogger logger)
+        public AzureWebHookStore(IStorageManager manager, SettingsDictionary settings, ILogger logger, string tableName = "WebHooks")
         {
+            WebHookTable = tableName;
             if (manager == null)
             {
                 throw new ArgumentNullException(nameof(manager));
@@ -64,9 +65,10 @@ namespace Microsoft.AspNet.WebHooks
         /// <paramref name="settings"/>, <paramref name="protector"/>, and <paramref name="logger"/>.
         /// Using this constructor, the data will be encrypted using the provided <paramref name="protector"/>.
         /// </summary>
-        public AzureWebHookStore(IStorageManager manager, SettingsDictionary settings, IDataProtector protector, ILogger logger)
-            : this(manager, settings, logger)
+        public AzureWebHookStore(IStorageManager manager, SettingsDictionary settings, IDataProtector protector, ILogger logger, string tableName = "WebHooks")
+            : this(manager, settings, logger, tableName)
         {
+            WebHookTable = tableName;
             if (protector == null)
             {
                 throw new ArgumentNullException(nameof(protector));
