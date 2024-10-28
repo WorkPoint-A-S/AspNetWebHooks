@@ -67,6 +67,10 @@ namespace Microsoft.AspNet.WebHooks
         }
 
         /// <inheritdoc />
+        public override Task<ICollection<WebHook>> GetAllWebHooksAsync(Func<WebHook, bool> predicate) =>
+            throw new NotImplementedException();
+
+        /// <inheritdoc />
         public override async Task<ICollection<WebHook>> GetAllWebHooksAsync(string user)
         {
             if (user == null)

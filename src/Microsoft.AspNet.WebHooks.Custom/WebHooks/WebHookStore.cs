@@ -20,6 +20,9 @@ namespace Microsoft.AspNet.WebHooks
         }
 
         /// <inheritdoc />
+        public abstract Task<ICollection<WebHook>> GetAllWebHooksAsync(Func<WebHook, bool> predicate);
+
+        /// <inheritdoc />
         public abstract Task<ICollection<WebHook>> GetAllWebHooksAsync(string user);
 
         /// <inheritdoc />

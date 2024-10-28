@@ -15,6 +15,13 @@ namespace Microsoft.AspNet.WebHooks
     public interface IWebHookStore
     {
         /// <summary>
+        /// Gets all registered <see cref="WebHook"/> instances for a given <paramref name="predicate"/>.
+        /// </summary>
+        /// <param name="predicate">The predicate for which to get the registered <see cref="WebHook"/> instances.</param>
+        /// <returns>All registered <see cref="WebHook"/> instances for this predicate.</returns>
+        Task<ICollection<WebHook>> GetAllWebHooksAsync(Func<WebHook, bool> predicate);
+
+        /// <summary>
         /// Gets all registered <see cref="WebHook"/> instances for a given <paramref name="user"/>.
         /// </summary>
         /// <param name="user">The user for which to get the registered <see cref="WebHook"/> instances.</param>
