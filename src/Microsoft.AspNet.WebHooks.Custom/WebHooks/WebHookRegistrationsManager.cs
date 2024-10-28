@@ -54,6 +54,13 @@ namespace Microsoft.AspNet.WebHooks
         }
 
         /// <inheritdoc />
+        public virtual async Task<IEnumerable<WebHook>> GetWebHooksAsync(Func<WebHook, bool> predicate)
+        {
+            IEnumerable<WebHook> webHooks = await _store.GetAllWebHooksAsync(predicate);
+            return webHooks;
+        }
+
+        /// <inheritdoc />
         public virtual async Task<IEnumerable<WebHook>> GetWebHooksAsync(IPrincipal user, Func<string, WebHook, Task> predicate)
         {
             var userId = await _userManager.GetUserIdAsync(user);

@@ -109,6 +109,24 @@ namespace Microsoft.AspNet.WebHooks
         }
 
         /// <inheritdoc />
+        public override async Task<ICollection<WebHook>> GetAllWebHooksAsync(Func<WebHook, bool> predicate)
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+            
+            var table = _manager.GetCloudTable(_connectionString, WebHookTable);
+            var query = new TableQuery();
+
+            var entities = await _manager.ExecuteQueryAsync(table, query);
+            ICollection<WebHook> result = entities.Select(e => ConvertToWebHook(e))
+                .Where(w => w != null && predicate(w))
+                .ToArray();
+            return result;
+        }
+
+        /// <inheritdoc />
         public override async Task<ICollection<WebHook>> GetAllWebHooksAsync(string user)
         {
             if (user == null)

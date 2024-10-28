@@ -22,6 +22,11 @@ namespace Microsoft.AspNet.WebHooks
             new ConcurrentDictionary<string, ConcurrentDictionary<string, WebHook>>();
 
         /// <inheritdoc />
+        public override Task<ICollection<WebHook>> GetAllWebHooksAsync(Func<WebHook, bool> predicate) =>
+            throw new NotImplementedException();
+
+
+        /// <inheritdoc />
         public override Task<ICollection<WebHook>> GetAllWebHooksAsync(string user)
         {
             if (user == null)
